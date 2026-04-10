@@ -1,0 +1,5 @@
+{
+  "name": "ताज़ी सब्जी स्टोर (Fresh Veggie Store)",
+  "description": "एक आधुनिक ताज़ी सब्जी स्टोर जहाँ आप ताज़ी सब्जियाँ ऑर्डर कर सकते हैं और अपनी लोकेशन के अनुसार दूरी चेक कर सकते हैं।",
+  "requestFramePermissions": ["geolocation"]
+}

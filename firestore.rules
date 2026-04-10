@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: orders
+    // Fields:
+    //   - customerName: string (required, size < 100)
+    //   - mobile: string (required, size == 10)
+    //   - address: string (required, size < 500)
+    //   - items: string (required, size < 2000)
+    //   - total: number (required, > 0)
+    //   - status: string (required, ['pending', 'completed', 'cancelled'])
+    //   - createdAt: timestamp (required)
+    //   - distance: number (optional)
+    //
+    // Collection: users
+    // Fields:
+    //   - email: string (required)
+    //   - role: string (required, ['admin', 'user'])
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || 
+         (request.auth.token.email == "sriswamiji108@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidOrder(data) {
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 100 &&
+             data.mobile is string && data.mobile.matches("^[0-9]{10}$") &&
+             data.address is string && data.address.size() > 0 && data.address.size() < 500 &&
+             data.items is string && data.items.size() > 0 && data.items.size() < 2000 &&
+             data.total is number && data.total >= 0 &&
+             data.status in ['pending', 'completed', 'cancelled'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidUser(data) {
+      return data.email is string && data.role in ['admin', 'user'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /orders/{orderId} {
+      // Anyone can create an order (publicly accessible for customers)
+      allow create: if isValidOrder(request.resource.data);
+      
+      // Only admins can read, update or delete orders
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Only admins can manage user roles
+      allow write: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

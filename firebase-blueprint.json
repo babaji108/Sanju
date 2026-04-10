@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "A vegetable order placed by a customer",
+      "type": "object",
+      "properties": {
+        "customerName": { "type": "string", "description": "Name of the customer" },
+        "mobile": { "type": "string", "description": "Mobile number of the customer" },
+        "address": { "type": "string", "description": "Delivery address" },
+        "items": { "type": "string", "description": "Summary of items ordered" },
+        "total": { "type": "number", "description": "Total order amount" },
+        "status": { "type": "string", "enum": ["pending", "completed", "cancelled"], "description": "Current status of the order" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the order was placed" },
+        "distance": { "type": "number", "description": "Distance from shop in KM" }
+      },
+      "required": ["customerName", "mobile", "address", "items", "total", "status", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Application user profile",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "user"] }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of customer orders"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles"
+    }
+  }
+}
